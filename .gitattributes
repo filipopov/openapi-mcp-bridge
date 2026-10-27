@@ -1,0 +1,4 @@
+# Normalize line endings: LF everywhere (mvnw must stay LF to run), CRLF for Windows scripts.
+* text=auto eol=lf
+*.cmd text eol=crlf
+*.jar binary
