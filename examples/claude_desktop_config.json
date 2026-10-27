@@ -1,0 +1,23 @@
+{
+  "mcpServers": {
+    "petstore": {
+      "command": "java",
+      "args": [
+        "-jar",
+        "/absolute/path/to/openapi-mcp-bridge.jar",
+        "--spec",
+        "/absolute/path/to/openapi-mcp-bridge/examples/petstore.yaml"
+      ]
+    },
+    "my-api": {
+      "command": "java",
+      "args": ["-jar", "/absolute/path/to/openapi-mcp-bridge.jar"],
+      "env": {
+        "OPENAPI_MCP_SPEC": "https://api.example.com/openapi.json",
+        "OPENAPI_MCP_BASE_URL": "https://api.example.com",
+        "OPENAPI_MCP_INCLUDE": "tag:orders,tag:customers",
+        "OPENAPI_MCP_HEADER_AUTHORIZATION": "Bearer <your-token>"
+      }
+    }
+  }
+}
