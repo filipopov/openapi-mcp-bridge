@@ -1,0 +1,238 @@
+openapi: 3.0.3
+info:
+  title: Tricky API
+  version: 0.0.1
+servers:
+  - url: https://{region}.example.com/api/{version}
+    variables:
+      region:
+        default: eu
+      version:
+        default: v2
+paths:
+  /items/{id}:
+    parameters:
+      - $ref: '#/components/parameters/ItemId'
+      - name: X-Trace
+        in: header
+        description: path-level header, overridden by the GET operation
+        schema:
+          type: string
+    get:
+      operationId: "items.get by-id!"
+      summary: Get an item
+      parameters:
+        - name: id
+          in: query
+          description: same name as the path parameter
+          schema:
+            type: string
+        - name: X-Trace
+          in: header
+          required: true
+          description: operation-level header
+          schema:
+            type: string
+        - name: Accept
+          in: header
+          description: must be ignored per the OpenAPI spec
+          schema:
+            type: string
+        - name: session
+          in: cookie
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ok
+    put:
+      operationId: replaceItem
+      parameters:
+        - name: body
+          in: query
+          description: a parameter literally called body
+          schema:
+            type: string
+      requestBody:
+        $ref: '#/components/requestBodies/ItemBody'
+      responses:
+        '204':
+          description: replaced
+    delete:
+      operationId: deleteItem
+      deprecated: true
+      summary: Delete an item
+      responses:
+        '204':
+          description: deleted
+  /items:
+    get:
+      summary: List items (no operationId)
+      parameters:
+        - name: tags
+          in: query
+          explode: false
+          schema:
+            type: array
+            items:
+              type: string
+        - name: filter
+          in: query
+          style: deepObject
+          schema:
+            type: object
+            properties:
+              color:
+                type: string
+              size:
+                type: integer
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+      responses:
+        '200':
+          description: ok
+    post:
+      operationId: createItem
+      tags: [admin]
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+          application/merge-patch+json:
+            schema:
+              $ref: '#/components/schemas/Item'
+      responses:
+        '201':
+          description: created
+  /trees/{treeId}:
+    get:
+      operationId: getTree
+      tags: [trees]
+      parameters:
+        - name: treeId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ok
+  /trees:
+    post:
+      operationId: getTree
+      description: Duplicate operationId on purpose (invalid but common in the wild).
+      tags: [trees]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TreeNode'
+      responses:
+        '200':
+          description: ok
+  /upload:
+    post:
+      operationId: uploadAttachment
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: ok
+  /notes:
+    post:
+      operationId: aVeryLongOperationIdThatKeepsGoingAndGoingWellBeyondTheSixtyFourCharacterLimitOfManyClients
+      requestBody:
+        content:
+          text/plain:
+            schema:
+              type: string
+      responses:
+        '200':
+          description: ok
+  /notes/archive:
+    post:
+      operationId: aVeryLongOperationIdThatKeepsGoingAndGoingWellBeyondTheSixtyFourCharacterLimitOfManyClientsToo
+      responses:
+        '200':
+          description: ok
+  /ping:
+    head:
+      operationId: "ping"
+      responses:
+        '200':
+          description: ok
+components:
+  parameters:
+    ItemId:
+      name: id
+      in: path
+      required: true
+      description: Item identifier
+      schema:
+        type: integer
+  requestBodies:
+    ItemBody:
+      required: true
+      description: The full item
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Item'
+  schemas:
+    Item:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+          example: widget
+          x-internal: true
+        nickname:
+          type: string
+          nullable: true
+        owner:
+          $ref: '#/components/schemas/Owner'
+        attributes:
+          allOf:
+            - $ref: '#/components/schemas/Base'
+            - type: object
+              properties:
+                weight:
+                  type: number
+    Owner:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+    Base:
+      type: object
+      properties:
+        createdAt:
+          type: string
+          format: date-time
+    TreeNode:
+      type: object
+      properties:
+        value:
+          type: string
+        children:
+          type: array
+          items:
+            $ref: '#/components/schemas/TreeNode'

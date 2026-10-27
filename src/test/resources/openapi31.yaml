@@ -1,0 +1,29 @@
+openapi: 3.1.0
+info:
+  title: OpenAPI 3.1 sample
+  version: 1.0.0
+servers:
+  - url: https://api.example.com
+paths:
+  /things/{thingId}:
+    get:
+      operationId: getThing
+      parameters:
+        - name: thingId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/ThingId'
+            description: The thing
+        - name: filter
+          in: query
+          schema:
+            type: [string, 'null']
+      responses:
+        '200':
+          description: ok
+components:
+  schemas:
+    ThingId:
+      type: string
+      pattern: '^[a-z0-9-]+$'
